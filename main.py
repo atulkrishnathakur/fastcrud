@@ -1,8 +1,18 @@
 from fastapi import FastAPI
+from fastapi import FastAPI,Depends, HTTPException, Response, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.encoders import jsonable_encoder
+from sqlalchemy import create_engine
+from router.router_base import api_router
 
 app = FastAPI()
 
+def include_router(app):
+    app.include_router(api_router)
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+def start_application():
+    app = FastAPI(DEBUG=True)
+    include_router(app)
+    return app
+
+app = start_application()

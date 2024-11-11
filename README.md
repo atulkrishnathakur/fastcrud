@@ -322,3 +322,77 @@ Reference: https://fastapi.tiangolo.com/reference/apirouter/
 1. Router helps you define endpoints and organize your API routes in a structured way.
 2. In FastAPI, a router is essentially a way to modularize your application by grouping related endpoints.
 3. FastAPI router work same as controller of other technoloy
+## Route directory structure
+1. create fastcrud/router/__init__.py
+2. create fastcrud/router/api/__init__.py
+3. create fastcrud/router/api/user_router.py
+```
+from fastapi import APIRouter,Depends,status
+from typing import Annotated
+from sqlalchemy.orm import Session
+
+router = APIRouter()
+
+@router.post("/get-user",name="getuser")
+def getUser():
+    try:
+        return "Hello"
+    except ValueError as e:
+        pass
+```
+4. create fastcrud/router/router_base.py
+```
+from fastapi import APIRouter, FastAPI
+from router.api import user_route
+
+api_router = APIRouter()
+# include the router
+api_router.include_router(user_route.router, prefix="", tags=["users"])
+```
+5. edit the fastcrud/main.py
+```
+from fastapi import FastAPI
+from fastapi import FastAPI,Depends, HTTPException, Response, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.encoders import jsonable_encoder
+from sqlalchemy import create_engine
+from router.router_base import api_router
+
+app = FastAPI()
+
+def include_router(app):
+    app.include_router(api_router)
+
+def start_application():
+    app = FastAPI(DEBUG=True)
+    include_router(app)
+    return app
+
+app = start_application()
+```
+6. Run the uvicorn server and test
+
+## sqlalchemy database session
+1. create fastcrud/database/session.py
+```
+from .dbconnection import SessionLocal
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+```
+## What is yield
+reference: https://www.w3schools.com/python/ref_keyword_yield.asp
+1. yield is a keyword
+2. yield work as return but yield donot stop code execution
+
+## sqlalchemy ORM tutorial
+reference1: https://www.geeksforgeeks.org/sqlalchemy-tutorial-in-python/
+reference2: https://www.tutorialspoint.com/sqlalchemy/sqlalchemy_orm_using_query.htm
+```
+alluser = db.query(User).all()
+```

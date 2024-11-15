@@ -4,6 +4,7 @@ from fastapi import status
 from sqlalchemy import select
 from sqlalchemy import insert
 from sqlalchemy import update
+from sqlalchemy import delete
 from sqlalchemy import text
 from sqlalchemy import bindparam
 from database.dbconnection import engine
@@ -144,7 +145,34 @@ def updateUser(db):
         db.execute(stmt)
         db.commit()
         """
-        
+ 
+        # You can also check sqlalchemy 1.4 from https://docs.sqlalchemy.org/en/14/orm/query.html 
+
     except Exception as e:
         print(f"Exception erro{e}")
         db.rollback()
+
+
+
+def deleteUser(db):
+    try:
+        """
+        # https://docs.sqlalchemy.org/en/20/orm/queryguide/dml.html
+
+        stmt = delete(User).where(User.email == "ram@yopmail.com")
+        db.execute(stmt)
+        db.commit()
+        """
+    
+        # https://docs.sqlalchemy.org/en/20/orm/queryguide/dml.html
+        
+        stmt = delete(User).where(User.id.in_([6,7]))
+        db.execute(stmt)
+        db.commit()
+        
+
+    except Exception as e:
+        print(f"Exception erro{e}")
+        db.rollback()
+
+

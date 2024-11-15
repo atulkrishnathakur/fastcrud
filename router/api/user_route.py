@@ -2,7 +2,7 @@ from fastapi import APIRouter,Depends,status
 from typing import Annotated
 from sqlalchemy.orm import Session
 from database.session import get_db
-from database.model_functions.user import read_all_user,saveUser,saveOrUpdateUser,updateUser
+from database.model_functions.user import read_all_user,saveUser,saveOrUpdateUser,updateUser,deleteUser
 
 router = APIRouter()
 
@@ -36,6 +36,15 @@ def saverOrUpdateUser(db:Session = Depends(get_db)):
 def saverOrUpdateUser(db:Session = Depends(get_db)):
     try:
         allUser = updateUser(db)
+        return allUser
+    except Exception as e:
+        print(f"Exception error {e}")
+
+
+@router.post("/delete-user",name="deleteuser")
+def saverOrUpdateUser(db:Session = Depends(get_db)):
+    try:
+        allUser = deleteUser(db)
         return allUser
     except Exception as e:
         print(f"Exception error {e}")

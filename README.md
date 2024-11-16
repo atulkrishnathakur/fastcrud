@@ -500,8 +500,7 @@ def read_all_user(db):
         """
         
         """
-        # get all users by scalars
-        result = db.scalars(select(User))
+        # get all users by scalar
         result = db.scalars(select(User).order_by(User.id))
         return result.all()
         """
@@ -698,7 +697,7 @@ def readbyoperators(db):
         '''
 
         '''
-        # get one record in object using one
+        # get one record in object using one function
         stmt = select(User).where(User.id == 10)
         result = db.execute(stmt)
         return result.scalars().one()
@@ -723,7 +722,7 @@ def readbyoperators(db):
         # https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.and_
         stmt = select(User).where(and_(User.firstname == "Guru",User.email=="myeml81@yopmail.com")).where(User.id==34)
         result = db.execute(stmt)
-        print(stmt.compile(engine)) # see sql in terminal
+        print(stmt.compile(engine)) # see query in terminal
         return result.scalars().all()
         """
     except Exception as e:
@@ -764,4 +763,192 @@ compile_stmt = stmt.compile(engine)
 #print(compile_stmt)
 result = db.execute(stmt)
 return result.scalars().all()
+```
+- in saveUser() funciton you can see to insert data in database table
+- You can save data in bulk
+
+```
+# https://docs.sqlalchemy.org/en/20/orm/queryguide/dml.html
+db.execute(
+    insert(User),
+    [
+        {"id":5,"firstname":"Ram","secondname":"Thakur","email":"myeml3@yopmail.com","status":1},
+        {"id":6,"firstname":"Balram","secondname":"Thakur","email":"myeml4@yopmail.com","status":1},
+        {"id":7,"firstname":"Krishna","secondname":"Thakur","email":"myeml5@yopmail.com","status":1},
+        {"id":8,"firstname":"Guru","secondname":"Thakur","email":"myeml6@yopmail.com","status":1}
+    ]
+)
+db.commit()
+result = db.execute(select(User).order_by(User.id))
+return result.scalars().all()
+```
+
+- in saveUser() funciton you can see to insert data in database table
+- You can save data in bulk
+- returning() function used to return latest inserted data
+```
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+userdata = db.execute(
+    insert(User).returning(User),
+    [
+        {"firstname":"Ram","secondname":"Thakur","email":f"myeml{random.randrange(1,100)}@yopmail.com","password":pwd_context.hash('12345'),"status":1},
+        {"firstname":"Balram","secondname":"Thakur","email":f"myeml{random.randrange(1,100)}@yopmail.com","password":pwd_context.hash('12345'),"status":1},
+        {"firstname":"Krishna","secondname":"Thakur","email":f"myeml{random.randrange(1,100)}@yopmail.com","password":pwd_context.hash('12345'),"status":1},
+        {"firstname":"Guru","secondname":"Thakur","email":f"myeml{random.randrange(1,100)}@yopmail.com","password":pwd_context.hash('12345'),"status":1}
+    ]
+)
+db.commit()
+return userdata.scalars().all()
+```
+
+- in saveUser() funciton you can see to insert new way to insert data in database table
+- Reference: https://docs.sqlalchemy.org/en/20/orm/session_basics.html#adding-new-or-existing-items
+
+```
+db_user = User(firstname="Atullll",secondname="Thakurrrr",email="myeml27@yopmail.com",status=1)
+db.add(db_user)
+db.commit()
+db.refresh(db_user)
+return db_user
+```
+
+- in updateUser() you can update data according to primary key in bulk. We have added primary key on id field. so data will be update according to id field.
+- References: https://docs.sqlalchemy.org/en/20/orm/queryguide/dml.html 
+
+```
+db.execute(
+    update(User),
+    [
+        {"id":5,"firstname":"Ram u","secondname":"Thakur","email":"myeml1@yopmail.com","status":1},
+        {"id":6,"firstname":"Balram u","secondname":"Thakur","email":"myeml2@yopmail.com","status":1},
+        {"id":7,"firstname":"Krishna u","secondname":"Thakur","email":"myeml3@yopmail.com","status":1},
+        {"id":8,"firstname":"Guru u","secondname":"Thakur","email":"myeml4@yopmail.com","status":1}
+    ]
+)
+db.commit()
+```
+
+- in updateUser() function you will see bindparam() function. It is used to update data in bulk. You can use dictionary key as argument of bindparam() function. 
+- Reference: https://docs.sqlalchemy.org/en/20/orm/queryguide/dml.html 
+
+```
+db.connection().execute(
+    update(User).where(User.firstname== bindparam("u_fname")).values(
+        firstname=bindparam("firstname"),
+        secondname=bindparam("secondname"),
+        email=bindparam("email"),
+        status=bindparam("status")
+    ),
+    [
+        {"u_fname":"Ram u","firstname":"Ram Kumar","secondname":"Thakur","email":"myeml11@yopmail.com","status":1},
+        {"u_fname":"Balram u","firstname":"Krishna Kumar","secondname":"Thakur","email":"myeml21@yopmail.com","status":0},
+        {"u_fname":"Krishna u","firstname":"Balram Kumar","secondname":"Thakur","email":"myeml31@yopmail.com","status":1},
+        {"u_fname":"Guru u","firstname":"Atul Kumar","secondname":"Thakur","email":"myeml41@yopmail.com","status":1}
+    ]
+)
+db.commit()
+```
+
+- In updateUser() you can see new way to update record using where clause
+- Reference: https://docs.sqlalchemy.org/en/20/orm/queryguide/dml.html
+
+```
+stmt = update(User).where(User.firstname.in_(["Ram Kumar","Krishna Thakur"])).values(secondname="Tha",email="ram@yopmail.com")
+db.execute(stmt)
+db.commit()
+```
+
+- Note: You can also check sqlalchemy 1.4 version if you have need from https://docs.sqlalchemy.org/en/14/orm/query.html
+
+
+- In deleteUser() function you will see a way to delete data using where clause.
+- References: https://docs.sqlalchemy.org/en/20/orm/queryguide/dml.html 
+```
+stmt = delete(User).where(User.email == "ram@yopmail.com")
+db.execute(stmt)
+db.commit()
+```
+
+- In deleteUser() function you will see a new way to delete data using where clause.
+- References: https://docs.sqlalchemy.org/en/20/orm/queryguide/dml.html 
+
+```
+stmt = delete(User).where(User.id.in_([6,7]))
+db.execute(stmt)
+db.commit()
+```
+
+- In readbyoperators() function you will see to get value of field
+```
+stmt = select(User)
+result = db.execute(stmt)
+usersArr = result.scalars().all()
+userObj = usersArr[0]
+fname = userObj.firstname
+sname = userObj.secondname
+email = userObj.email
+created_at = userObj.created_at
+mydate = created_at.date()
+myyear = created_at.year
+mymonth = created_at.month
+myday = created_at.day
+mytime = created_at.time()
+myhour = created_at.time().hour
+myminutes = created_at.time().minute
+mysecond = created_at.time().second
+mymiliseconds = created_at.time().microsecond
+formatted_date = created_at.strftime("%m/%d/%Y")
+dayname = created_at.strftime("%A") # Saturday # https://www.w3schools.com/python/python_datetime.asp
+return formatted_date
+```
+
+- In readbyoperators() function you will see to get records using where clause.
+```
+stmt = select(User).where(User.id == 10)
+result = db.execute(stmt)
+return result.scalars().all()
+```
+
+- In readbyoperators() function you will see to get single record using one() function.
+```
+stmt = select(User).where(User.id == 10)
+result = db.execute(stmt)
+return result.scalars().one()
+```
+
+- In readbyoperators() function you will see to get single record using first() function.
+```
+stmt = select(User).where(User.id == 10)
+result = db.execute(stmt)
+return result.scalars().first()
+```
+
+- In readbyoperators() function you will see to get records using where clause with and_ .
+- Reference: https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.and_
+
+```
+stmt = select(User).where(User.id == 10)
+result = db.execute(stmt)
+return result.scalars().all()
+```
+
+- In readbyoperators() function you will see to get records using multiple time where clause with and_ .
+- Reference: https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.and_
+
+```
+stmt = select(User).where(and_(User.firstname == "Guru",User.email=="myeml81@yopmail.com")).where(User.id==34)
+result = db.execute(stmt)
+print(stmt.compile(engine)) # see query in terminal
+return result.scalars().all()
+```
+- Note: You can learn more sql operators from https://docs.sqlalchemy.org/en/20/core 
+
+
+- In text() function you can use queries to run
+
+```
+db.execute(text("TRUNCATE TABLE users;"))
+db.execute(text("ALTER SEQUENCE users_id_seq RESTART WITH 1;"))
+db.commit()
 ```

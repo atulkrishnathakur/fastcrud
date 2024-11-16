@@ -221,7 +221,7 @@ def readbyoperators(db):
         '''
 
         '''
-        # get one record in object using one
+        # get one record in object using one function
         stmt = select(User).where(User.id == 10)
         result = db.execute(stmt)
         return result.scalars().one()
@@ -246,7 +246,7 @@ def readbyoperators(db):
         # https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.and_
         stmt = select(User).where(and_(User.firstname == "Guru",User.email=="myeml81@yopmail.com")).where(User.id==34)
         result = db.execute(stmt)
-        print(stmt.compile(engine)) # see sql in terminal
+        print(stmt.compile(engine)) # see query in terminal
         return result.scalars().all()
         """
     except Exception as e:

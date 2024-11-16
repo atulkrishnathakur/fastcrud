@@ -730,7 +730,7 @@ def readbyoperators(db):
         pass
 ```
 
--- in read_all_user funciton you can see to select all users
+- in read_all_user funciton you can see to select all users
 ```
 # https://docs.sqlalchemy.org/en/20/orm/queryguide/select.html
 #get all users by query
@@ -738,15 +738,15 @@ result = db.query(User).all()
 return result
 ```
 
--- in read_all_user funciton you can see a new way to select all users
+- in read_all_user funciton you can see a new way to select all users
 ```
 #get all users by scalar
 result = db.scalars(select(User).order_by(User.id))
 return result.all()
 ```
 
--- in read_all_user funciton you can see a new way to select all users
--- compile() function used to print sql query in terminal
+- in read_all_user funciton you can see a new way to select all users
+- compile() function used to print sql query in terminal
 ```
 #get all users by select
 stmt = select(User)
@@ -756,8 +756,8 @@ result = db.execute(stmt)
 return result.scalars().all()
 ```
 
--- in read_all_user funciton you can see a new way to select all users using where clause
--- compile() function used to print sql query in terminal
+- in read_all_user funciton you can see a new way to select all users using where clause
+- compile() function used to print sql query in terminal
 ```
 stmt = select(User).where(User.firstname == 'Atul')
 compile_stmt = stmt.compile(engine)
@@ -765,4 +765,3 @@ compile_stmt = stmt.compile(engine)
 result = db.execute(stmt)
 return result.scalars().all()
 ```
-

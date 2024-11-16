@@ -117,7 +117,7 @@ sqlalchemy.url = postgresql://postgres:123456789@localhost:5432/fastcrud_db
 
 1. create fastcrud/database directory
 2. create the fastcrud/database/dbconnection.py
-3. create the fastcrud/database/__init__.py
+3. "create the fastcrud/database/__init__.py"
 ```
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -136,8 +136,8 @@ Base = declarative_base()
 ## Create the model directory for sqlalchemy ORM
 
 1. create the database/model directory
-2. create the database/model/__init__.py file
-3. import the created model in database/model/__init__.py file
+2. create the "database/model/__init__.py" file
+3. import the created model in "database/model/__init__.py" file
 
 ## set the env.py in alembic
 
@@ -255,7 +255,7 @@ class User(Base):
     created_at:Mapped[DateTime] = mapped_column('created_at',DateTime, nullable=True, server_default=func.now())
     updated_at:Mapped[DateTime] = mapped_column('updated_at',DateTime,nullable=True)
 ```
-2. edit the fastcrud/database/model/__init__.py file
+2. edit the "fastcrud/database/model/__init__.py" file
 ```
 from .user import User
 ```
@@ -323,8 +323,8 @@ Reference: https://fastapi.tiangolo.com/reference/apirouter/
 2. In FastAPI, a router is essentially a way to modularize your application by grouping related endpoints.
 3. FastAPI router work same as controller of other technoloy
 ## Route directory structure
-1. create fastcrud/router/__init__.py
-2. create fastcrud/router/api/__init__.py
+1. create "fastcrud/router/__init__.py"
+2. create "fastcrud/router/api/__init__.py"
 3. create fastcrud/router/api/user_router.py
 ```
 from fastapi import APIRouter,Depends,status
@@ -396,3 +396,373 @@ reference2: https://www.tutorialspoint.com/sqlalchemy/sqlalchemy_orm_using_query
 ```
 alluser = db.query(User).all()
 ```
+
+## hashing 
+1. It is for hashed password
+https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/#install-passlib
+
+```
+(env) atul@atul-Lenovo-G570:~/fastcrud$ pip3 install "passlib[bcrypt]"
+```
+
+# How to select data from table using sqlalchemy
+Reference: https://docs.sqlalchemy.org/en/20/orm/queryguide/select.html
+1. edit the /home/atul/fastcrud/router/api/user_route.py
+
+```
+from fastapi import APIRouter,Depends,status
+from typing import Annotated
+from sqlalchemy.orm import Session
+from database.session import get_db
+from database.model_functions.user import (read_all_user,saveUser,saveOrUpdateUser,
+updateUser,deleteUser,readbyoperators)
+
+router = APIRouter()
+
+@router.post("/get-user",name="getuser")
+def getUser(db:Session = Depends(get_db)):
+    try:
+        allUser = read_all_user(db)
+        return allUser
+    except Exception as e:
+        print(f"Exception error {e}")
+
+@router.post("/create-user",name="createuser")
+def createUser(db:Session = Depends(get_db)):
+    try:
+        allUser = saveUser(db)
+        return allUser
+    except Exception as e:
+        print(f"Exception error {e}")
+
+
+@router.post("/upsert-user",name="upsertuser")
+def saverOrUpdateUser(db:Session = Depends(get_db)):
+    try:
+        allUser = saveOrUpdateUser(db)
+        return allUser
+    except Exception as e:
+        print(f"Exception error {e}")
+
+
+@router.post("/update-user",name="updateuser")
+def saverOrUpdateUser(db:Session = Depends(get_db)):
+    try:
+        allUser = updateUser(db)
+        return allUser
+    except Exception as e:
+        print(f"Exception error {e}")
+
+
+@router.post("/delete-user",name="deleteuser")
+def saverOrUpdateUser(db:Session = Depends(get_db)):
+    try:
+        allUser = deleteUser(db)
+        return allUser
+    except Exception as e:
+        print(f"Exception error {e}")
+
+@router.post("/select-user-by-operator",name="deleteuserbyoperator")
+def selectuserbyoperatorfn(db:Session = Depends(get_db)):
+    try:
+        allUser = readbyoperators(db)
+        return allUser
+    except Exception as e:
+        print(f"Exception error {e}")
+
+```
+
+2. create the fastcrud/database/model_functions/user.py
+```
+from database.model.user import User
+from fastapi import Depends
+from fastapi import status
+from sqlalchemy import select
+from sqlalchemy import insert
+from sqlalchemy import update
+from sqlalchemy import delete
+from sqlalchemy import text
+from sqlalchemy import bindparam
+from sqlalchemy import and_
+from database.dbconnection import engine
+from sqlalchemy.dialects.sqlite import insert as sql_upsert
+from passlib.context import CryptContext
+import random
+from datetime import datetime
+
+def read_all_user(db):
+    try:
+        """
+        # https://docs.sqlalchemy.org/en/20/orm/queryguide/select.html
+        #get all users by query
+        result = db.query(User).all()
+        return result
+        """
+        
+        """
+        # get all users by scalars
+        result = db.scalars(select(User))
+        result = db.scalars(select(User).order_by(User.id))
+        return result.all()
+        """
+        
+        """
+        #get all users by execute
+        result = db.execute(select(User).order_by(User.id))
+        return result.scalars().all()
+        """
+        """
+        #get all users by select
+        stmt = select(User)
+        compile_stmt = stmt.compile(engine) # print the sql query
+        print(compile_stmt)
+        result = db.execute(stmt)
+        return result.scalars().all()
+        """
+
+        """
+        stmt = select(User).where(User.firstname == 'Atul')
+        compile_stmt = stmt.compile(engine)
+        #print(compile_stmt)
+        result = db.execute(stmt)
+        return result.scalars().all()
+        """
+    except Exception as e:
+        print(f"Exception error{e}")
+
+def saveUser(db):
+    try:
+        """
+        db.execute(text("TRUNCATE TABLE users;"))
+        db.execute(text("ALTER SEQUENCE users_id_seq RESTART WITH 1;"))
+        db.commit()
+        """
+       
+        """
+         # https://docs.sqlalchemy.org/en/20/orm/queryguide/dml.html
+        db.execute(
+            insert(User),
+            [
+                {"id":5,"firstname":"Ram","secondname":"Thakur","email":"myeml3@yopmail.com","status":1},
+                {"id":6,"firstname":"Balram","secondname":"Thakur","email":"myeml4@yopmail.com","status":1},
+                {"id":7,"firstname":"Krishna","secondname":"Thakur","email":"myeml5@yopmail.com","status":1},
+                {"id":8,"firstname":"Guru","secondname":"Thakur","email":"myeml6@yopmail.com","status":1}
+            ]
+        )
+        db.commit()
+        result = db.execute(select(User).order_by(User.id))
+        return result.scalars().all()
+        """
+
+        """
+        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        
+        userdata = db.execute(
+            insert(User).returning(User),
+            [
+                {"firstname":"Ram","secondname":"Thakur","email":f"myeml{random.randrange(1,100)}@yopmail.com","password":pwd_context.hash('12345'),"status":1},
+                {"firstname":"Balram","secondname":"Thakur","email":f"myeml{random.randrange(1,100)}@yopmail.com","password":pwd_context.hash('12345'),"status":1},
+                {"firstname":"Krishna","secondname":"Thakur","email":f"myeml{random.randrange(1,100)}@yopmail.com","password":pwd_context.hash('12345'),"status":1},
+                {"firstname":"Guru","secondname":"Thakur","email":f"myeml{random.randrange(1,100)}@yopmail.com","password":pwd_context.hash('12345'),"status":1}
+            ]
+        )
+        db.commit()
+        return userdata.scalars().all()
+        
+        # returning() function return latest inserted users
+        """
+
+        """
+        #https://docs.sqlalchemy.org/en/20/orm/session_basics.html#adding-new-or-existing-items
+        db_user = User(firstname="Atullll",secondname="Thakurrrr",email="myeml27@yopmail.com",status=1)
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+        return db_user
+        """
+    except Exception as e:
+        print(f"Exception erro{e}")
+        db.rollback()
+
+
+def saveOrUpdateUser(db):
+    try:
+        pass
+        # Explain it again
+    except Exception as e:
+        print(f"Exception erro{e}")
+
+
+def updateUser(db):
+    try:
+        '''
+        # https://docs.sqlalchemy.org/en/20/orm/queryguide/dml.html
+        # It will be automatically update according to Id because primary key added on Id
+        # It means it will be update according to primary key
+        db.execute(
+            update(User),
+            [
+                {"id":5,"firstname":"Ram u","secondname":"Thakur","email":"myeml1@yopmail.com","status":1},
+                {"id":6,"firstname":"Balram u","secondname":"Thakur","email":"myeml2@yopmail.com","status":1},
+                {"id":7,"firstname":"Krishna u","secondname":"Thakur","email":"myeml3@yopmail.com","status":1},
+                {"id":8,"firstname":"Guru u","secondname":"Thakur","email":"myeml4@yopmail.com","status":1}
+            ]
+        )
+        db.commit()
+        '''
+
+
+        """
+        # https://docs.sqlalchemy.org/en/20/orm/queryguide/dml.html
+        # Bulk UPDATE statement with multiple parameter sets
+        # If you do not usd bindparam then it you can use actual field of database table
+        db.connection().execute(
+            update(User).where(User.firstname== bindparam("u_fname")).values(
+                firstname=bindparam("firstname"),
+                secondname=bindparam("secondname"),
+                email=bindparam("email"),
+                status=bindparam("status")
+            ),
+            [
+                {"u_fname":"Ram u","firstname":"Ram Kumar","secondname":"Thakur","email":"myeml11@yopmail.com","status":1},
+                {"u_fname":"Balram u","firstname":"Krishna Kumar","secondname":"Thakur","email":"myeml21@yopmail.com","status":0},
+                {"u_fname":"Krishna u","firstname":"Balram Kumar","secondname":"Thakur","email":"myeml31@yopmail.com","status":1},
+                {"u_fname":"Guru u","firstname":"Atul Kumar","secondname":"Thakur","email":"myeml41@yopmail.com","status":1}
+            ]
+        )
+        db.commit()
+        """
+
+        """
+        # https://docs.sqlalchemy.org/en/20/orm/queryguide/dml.html
+        stmt = update(User).where(User.firstname.in_(["Ram Kumar","Krishna Thakur"])).values(secondname="Tha",email="ram@yopmail.com")
+        db.execute(stmt)
+        db.commit()
+        """
+ 
+        # You can also check sqlalchemy 1.4 from https://docs.sqlalchemy.org/en/14/orm/query.html 
+
+    except Exception as e:
+        print(f"Exception erro{e}")
+        db.rollback()
+
+def deleteUser(db):
+    try:
+        """
+        # https://docs.sqlalchemy.org/en/20/orm/queryguide/dml.html
+
+        stmt = delete(User).where(User.email == "ram@yopmail.com")
+        db.execute(stmt)
+        db.commit()
+        """
+        
+        """
+        # https://docs.sqlalchemy.org/en/20/orm/queryguide/dml.html
+        stmt = delete(User).where(User.id.in_([6,7]))
+        db.execute(stmt)
+        db.commit()
+        """
+    except Exception as e:
+        print(f"Exception erro{e}")
+        db.rollback()
+
+def readbyoperators(db):
+    try:
+
+        """
+        stmt = select(User)
+        result = db.execute(stmt)
+        usersArr = result.scalars().all()
+        userObj = usersArr[0]
+        fname = userObj.firstname
+        sname = userObj.secondname
+        email = userObj.email
+        created_at = userObj.created_at
+        mydate = created_at.date()
+        myyear = created_at.year
+        mymonth = created_at.month
+        myday = created_at.day
+        mytime = created_at.time()
+        myhour = created_at.time().hour
+        myminutes = created_at.time().minute
+        mysecond = created_at.time().second
+        mymiliseconds = created_at.time().microsecond
+        formatted_date = created_at.strftime("%m/%d/%Y")
+        dayname = created_at.strftime("%A") # Saturday # https://www.w3schools.com/python/python_datetime.asp
+        return formatted_date
+        """
+        '''
+        stmt = select(User).where(User.id == 10)
+        result = db.execute(stmt)
+        return result.scalars().all()
+        '''
+
+        '''
+        # get one record in object using one
+        stmt = select(User).where(User.id == 10)
+        result = db.execute(stmt)
+        return result.scalars().one()
+        '''
+
+        '''
+        # get one record in object using first
+        stmt = select(User).where(User.id == 10)
+        result = db.execute(stmt)
+        return result.scalars().first()
+        '''
+        
+        """
+        # https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.and_
+        stmt = select(User).where(and_(User.firstname == "Krishna", User.email == "myeml62@yopmail.com"))
+        result = db.execute(stmt)
+        #print(stmt.compile(engine)) # see sql in terminal
+        return result.scalars().all()
+        """
+
+        """
+        # https://docs.sqlalchemy.org/en/20/core/sqlelement.html#sqlalchemy.sql.expression.and_
+        stmt = select(User).where(and_(User.firstname == "Guru",User.email=="myeml81@yopmail.com")).where(User.id==34)
+        result = db.execute(stmt)
+        print(stmt.compile(engine)) # see sql in terminal
+        return result.scalars().all()
+        """
+    except Exception as e:
+        pass
+```
+
+-- in read_all_user funciton you can see to select all users
+```
+# https://docs.sqlalchemy.org/en/20/orm/queryguide/select.html
+#get all users by query
+result = db.query(User).all()
+return result
+```
+
+-- in read_all_user funciton you can see a new way to select all users
+```
+#get all users by scalar
+result = db.scalars(select(User).order_by(User.id))
+return result.all()
+```
+
+-- in read_all_user funciton you can see a new way to select all users
+-- compile() function used to print sql query in terminal
+```
+#get all users by select
+stmt = select(User)
+compile_stmt = stmt.compile(engine) # print the sql query
+print(compile_stmt)
+result = db.execute(stmt)
+return result.scalars().all()
+```
+
+-- in read_all_user funciton you can see a new way to select all users using where clause
+-- compile() function used to print sql query in terminal
+```
+stmt = select(User).where(User.firstname == 'Atul')
+compile_stmt = stmt.compile(engine)
+#print(compile_stmt)
+result = db.execute(stmt)
+return result.scalars().all()
+```
+

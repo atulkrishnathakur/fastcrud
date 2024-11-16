@@ -390,12 +390,6 @@ reference: https://www.w3schools.com/python/ref_keyword_yield.asp
 1. yield is a keyword
 2. yield work as return but yield donot stop code execution
 
-## sqlalchemy ORM tutorial
-reference1: https://www.geeksforgeeks.org/sqlalchemy-tutorial-in-python/
-reference2: https://www.tutorialspoint.com/sqlalchemy/sqlalchemy_orm_using_query.htm
-```
-alluser = db.query(User).all()
-```
 
 ## hashing 
 1. It is for hashed password

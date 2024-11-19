@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from database.session import get_db
 from database.model_functions.user import (read_all_user,saveUser,saveOrUpdateUser,
 updateUser,deleteUser,readbyoperators)
+import logging
 
 router = APIRouter()
 

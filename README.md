@@ -946,3 +946,64 @@ db.execute(text("TRUNCATE TABLE users;"))
 db.execute(text("ALTER SEQUENCE users_id_seq RESTART WITH 1;"))
 db.commit()
 ```
+
+## postgresql data types in sqlalchemy
+References: https://docs.sqlalchemy.org/en/20/dialects/postgresql.html 
+```from sqlalchemy.dialects.postgresql import (
+    ARRAY,
+    BIGINT,
+    BIT,
+    BOOLEAN,
+    BYTEA,
+    CHAR,
+    CIDR,
+    CITEXT,
+    DATE,
+    DATEMULTIRANGE,
+    DATERANGE,
+    DOMAIN,
+    DOUBLE_PRECISION,
+    ENUM,
+    FLOAT,
+    HSTORE,
+    INET,
+    INT4MULTIRANGE,
+    INT4RANGE,
+    INT8MULTIRANGE,
+    INT8RANGE,
+    INTEGER,
+    INTERVAL,
+    JSON,
+    JSONB,
+    JSONPATH,
+    MACADDR,
+    MACADDR8,
+    MONEY,
+    NUMERIC,
+    NUMMULTIRANGE,
+    NUMRANGE,
+    OID,
+    REAL,
+    REGCLASS,
+    REGCONFIG,
+    SMALLINT,
+    TEXT,
+    TIME,
+    TIMESTAMP,
+    TSMULTIRANGE,
+    TSQUERY,
+    TSRANGE,
+    TSTZMULTIRANGE,
+    TSTZRANGE,
+    TSVECTOR,
+    UUID,
+    VARCHAR,
+)
+```
+
+## How to use Sequences/SERIAL/IDENTITY in sqlalchemy
+References: https://docs.sqlalchemy.org/en/20/dialects/postgresql.html
+
+
+## How to logging 
+References:https://docs.python.org/3/howto/logging.html 

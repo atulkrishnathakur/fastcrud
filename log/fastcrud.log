@@ -1,0 +1,4 @@
+DEBUG:database.model_functions.country:This message should go to the log file
+INFO:database.model_functions.country:So should this
+WARNING:database.model_functions.country:And this, too
+ERROR:database.model_functions.country:And non-ASCII stuff, too, like Øresund and Malmö

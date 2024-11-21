@@ -13,6 +13,7 @@ from sqlalchemy.dialects.sqlite import insert as sql_upsert
 from passlib.context import CryptContext
 import random
 from datetime import datetime
+from fastapi.encoders import jsonable_encoder
 
 def read_all_user(db):
     try:
@@ -50,6 +51,19 @@ def read_all_user(db):
         result = db.execute(stmt)
         return result.scalars().all()
         """
+        stmt = select(User)
+        result = db.execute(stmt)
+        data = result.all()
+        #print(data[0][0].firstname) # manualy print firstname
+        response_content = [
+            {"first_name": user.User.firstname,
+            'second_name':user.User.secondname,
+            'email':user.User.email
+            } for user in data]
+        #print(response_content) # use to print content
+        jsondata = jsonable_encoder(response_content)
+        return jsondata
+
     except Exception as e:
         print(f"Exception error{e}")
 

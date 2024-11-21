@@ -483,6 +483,7 @@ from sqlalchemy.dialects.sqlite import insert as sql_upsert
 from passlib.context import CryptContext
 import random
 from datetime import datetime
+from fastapi.encoders import jsonable_encoder
 
 def read_all_user(db):
     try:
@@ -520,6 +521,19 @@ def read_all_user(db):
         result = db.execute(stmt)
         return result.scalars().all()
         """
+        stmt = select(User)
+        result = db.execute(stmt)
+        data = result.all()
+        #print(data[0][0].firstname) # manualy print firstname
+        response_content = [
+            {"first_name": user.User.firstname,
+            'second_name':user.User.secondname,
+            'email':user.User.email
+            } for user in data]
+        #print(response_content) # use to print content
+        jsondata = jsonable_encoder(response_content)
+        return jsondata
+
     except Exception as e:
         print(f"Exception error{e}")
 
@@ -758,6 +772,23 @@ compile_stmt = stmt.compile(engine)
 result = db.execute(stmt)
 return result.scalars().all()
 ```
+- In read_all_user function you can see a new way to select all user. Here we are not using scalars() function. Here we are make data using jsonable_encoder() function. In this way you can controller your data.
+
+```
+stmt = select(User)
+result = db.execute(stmt)
+data = result.all()
+#print(data[0][0].firstname) # manualy print firstname
+response_content = [
+    {"first_name": user.User.firstname,
+    'second_name':user.User.secondname,
+    'email':user.User.email
+    } for user in data]
+#print(response_content) # use to print content
+jsondata = jsonable_encoder(response_content)
+return jsondata
+```
+
 - in saveUser() funciton you can see to insert data in database table
 - You can save data in bulk
 
@@ -1007,3 +1038,91 @@ References: https://docs.sqlalchemy.org/en/20/dialects/postgresql.html
 
 ## How to logging 
 References:https://docs.python.org/3/howto/logging.html 
+
+
+## select data from inner join
+- create a file database/model_functions/state.py
+- join() function used as inner join
+
+```
+from database.model.state import State
+from database.model.country import Country
+from fastapi import Depends
+from fastapi import status
+from sqlalchemy import select
+from sqlalchemy import insert
+from sqlalchemy import update
+from sqlalchemy import delete
+from sqlalchemy import text
+from sqlalchemy import bindparam
+from sqlalchemy import and_
+from database.dbconnection import engine
+from sqlalchemy.dialects.sqlite import insert as sql_upsert
+from passlib.context import CryptContext
+import random
+from datetime import datetime
+from fastapi.encoders import jsonable_encoder
+
+class Statedb:
+    @staticmethod
+    def read_all(db):
+        try:
+            '''
+            stmt = select(State,Country).join(Country, State.countries_id == Country.id) # join() used for inner join
+            result = db.execute(stmt) 
+            data = result.all() # Here we can not use scalars() because scalars() use with only one object. Here it return object in tuple. You can check by print.
+            #print(data)
+            response_content = [{"state_id":state.id,"country_id":state.countries_id,"country_name": country.countryname, "state_name": state.statename} for state, country in data]
+            #print(response_content)
+            jsondata = jsonable_encoder(response_content)
+            return jsondata
+            '''
+
+            stmt = select(State.id,State.statename,Country.countryname).join(Country, State.countries_id == Country.id) # join() used for inner join
+            result = db.execute(stmt) 
+            data = result.all() # It return tuple with values only
+            #print(data)
+            response_content = [{"state_id":stateid,"country_name":countryname, "state_name":statename} for stateid, statename,countryname in data] # it return values according to select() field respectively.
+            #print(response_content)
+            jsondata = jsonable_encoder(response_content)
+            return jsondata
+
+
+        except Exception as e:
+            print(f"Exception error{e}")
+    
+    @staticmethod
+    def saveData(db):
+        try:
+            #https://docs.sqlalchemy.org/en/20/orm/session_basics.html#adding-new-or-existing-items
+            reqstatename = "Bihar"
+            dbmodel = State(statename=reqstatename,status=1,countries_id=1)
+            db.add(dbmodel)
+            db.commit()
+            db.refresh(dbmodel)
+            return dbmodel
+        except Exception as e:
+            print(f"Exception error{e}")
+```
+- in read_all function you can see to join two modle
+```
+stmt = select(State,Country).join(Country, State.countries_id == Country.id) # join() used for inner join
+result = db.execute(stmt) 
+data = result.all() # Here we can not use scalars() because scalars() use with only one object. Here it return object in tuple. You can check by print.
+#print(data)
+response_content = [{"state_id":state.id,"country_id":state.countries_id,"country_name": country.countryname, "state_name": state.statename} for state, country in data]
+#print(response_content)
+jsondata = jsonable_encoder(response_content)
+return jsondata
+```
+- in read_all function you can see to join two modle and select specific fields
+```
+stmt = select(State.id,State.statename,Country.countryname).join(Country, State.countries_id == Country.id) # join() used for inner join
+result = db.execute(stmt) 
+data = result.all() # It return tuple with values only
+#print(data)
+response_content = [{"state_id":stateid,"country_name":countryname, "state_name":statename} for stateid, statename,countryname in data] # it return values according to select() field respectively.
+#print(response_content)
+jsondata = jsonable_encoder(response_content)
+return jsondata
+```

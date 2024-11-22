@@ -30,7 +30,7 @@ class Statedb:
             jsondata = jsonable_encoder(response_content)
             return jsondata
             '''
-
+            '''
             stmt = select(State.id,State.statename,Country.countryname).join(Country, State.countries_id == Country.id) # join() used for inner join
             result = db.execute(stmt) 
             data = result.all() # It return tuple with values only
@@ -39,7 +39,17 @@ class Statedb:
             #print(response_content)
             jsondata = jsonable_encoder(response_content)
             return jsondata
+            '''
 
+            stmt = select(State.id,State.statename,Country.countryname).leftjoin(Country, State.countries_id == Country.id) # join() used for inner join
+            result = db.execute(stmt) 
+            print(stmt.compile(engine))
+            data = result.all() # It return tuple with values only
+            #print(data)
+            #response_content = [{"state_id":stateid,"country_name":countryname, "state_name":statename} for stateid, statename,countryname in data] # it return values according to select() field respectively.
+            #print(response_content)
+            #jsondata = jsonable_encoder(response_content)
+            #return jsondata
 
         except Exception as e:
             print(f"Exception error{e}")

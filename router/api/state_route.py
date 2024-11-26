@@ -9,7 +9,7 @@ router = APIRouter()
 
 
 @router.post("/state-list",name="statelist")
-def getCountry(db:Session = Depends(get_db)):
+def getState(db:Session = Depends(get_db)):
     try:
         alldata = Statedb.read_all(db)
         return alldata
@@ -18,7 +18,7 @@ def getCountry(db:Session = Depends(get_db)):
 
 
 @router.post("/save-state",name="savestate")
-def createUser(db:Session = Depends(get_db)):
+def saveState(db:Session = Depends(get_db)):
     try:
         insetedData = Statedb.saveData(db)
         return insetedData

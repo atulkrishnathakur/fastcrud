@@ -32,3 +32,11 @@ def updateUser(db:Session = Depends(get_db)):
         return updatedData
     except Exception as e:
         print(f"Exception error {e}")
+
+@router.post("/delete-city",name="deletecity")
+def deleteCity(db:Session = Depends(get_db)):
+    try:
+        allCity = Citydb.deleteCity(db)
+        return allCity
+    except Exception as e:
+        print(f"Exception error {e}")

@@ -1440,3 +1440,8 @@ Installing collected packages: loguru
 Successfully installed loguru-0.7.2
 ```
 
+## How to upload file in fastapi
+1. install the python-multipart. Reference: https://fastapi.tiangolo.com/tutorial/request-files
+```
+(env) atul@atul-Lenovo-G570:~/fastcrud$ pip3 install python-multipart
+```

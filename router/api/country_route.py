@@ -23,3 +23,19 @@ def createUser(db:Session = Depends(get_db)):
         return insetedData
     except Exception as e:
         print(f"Exception error {e}")
+
+@router.post("/update-country",name="updatecountry")
+def createCountry(db:Session = Depends(get_db)):
+    try:
+        updatedData = Countrydb.updateData(db)
+        return updatedData
+    except Exception as e:
+        print(f"Exception error {e}")
+
+@router.post("/delete-country",name="deletecountry")
+def deleteCountry(db:Session = Depends(get_db)):
+    try:
+        deletedData = Countrydb.deleteCountry(db)
+        return deletedData
+    except Exception as e:
+        print(f"Exception error {e}")

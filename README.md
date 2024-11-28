@@ -1417,8 +1417,14 @@ class Citydb:
 ```
 
 
-# for left join or full joi check the url
+## for left join or full joi check the url
 Reference: https://docs.sqlalchemy.org/en/20/tutorial/data_select.html
+
+## How to use CASCADE, SET NULL in sqlalchemy model
+Reference: https://docs.sqlalchemy.org/en/20/core/constraints.html
+
+## How to logging 
+References:https://docs.python.org/3/howto/logging.html 
 
 ## loguru package for logging in python
 Reference: https://loguru.readthedocs.io/en/stable/
@@ -1433,3 +1439,4 @@ Downloading loguru-0.7.2-py3-none-any.whl (62 kB)
 Installing collected packages: loguru
 Successfully installed loguru-0.7.2
 ```
+

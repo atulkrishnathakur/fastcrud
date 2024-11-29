@@ -4,8 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import create_engine
 from router.router_base import api_router
-
-app = FastAPI()
+from config.static_mount import mount_uploaded_files
+#app = FastAPI()
 
 def include_router(app):
     app.include_router(api_router)
@@ -13,6 +13,7 @@ def include_router(app):
 def start_application():
     app = FastAPI(DEBUG=True)
     include_router(app)
+    mount_uploaded_files(app)
     return app
 
 app = start_application()

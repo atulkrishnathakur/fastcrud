@@ -1445,3 +1445,42 @@ Successfully installed loguru-0.7.2
 ```
 (env) atul@atul-Lenovo-G570:~/fastcrud$ pip3 install python-multipart
 ```
+
+## how to generate url from uploaded file or images. It means how to mount static files?
+Reference: https://fastapi.tiangolo.com/tutorial/static-files 
+Note: You can not mount with APIRouter(). It only mount with FastAPI()
+
+1. create the `config/__init__.py`
+2. create the `config/static_mount.py`
+```
+from fastapi.staticfiles import StaticFiles
+
+def mount_uploaded_files(app):
+    UPLOAD_DIRECTORY = "./uploads/"
+    app.mount("/uploads", StaticFiles(directory=UPLOAD_DIRECTORY), name="uploads")
+```
+
+3. edit the main.py file
+
+```
+from fastapi import FastAPI
+from fastapi import FastAPI,Depends, HTTPException, Response, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.encoders import jsonable_encoder
+from sqlalchemy import create_engine
+from router.router_base import api_router
+from config.static_mount import mount_uploaded_files
+#app = FastAPI()
+
+def include_router(app):
+    app.include_router(api_router)
+
+def start_application():
+    app = FastAPI(DEBUG=True)
+    include_router(app)
+    mount_uploaded_files(app)
+    return app
+
+app = start_application()
+```
+4. After mounting you can open your static files in browser

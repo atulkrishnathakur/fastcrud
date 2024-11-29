@@ -6,6 +6,7 @@ from database.session import get_db
 from database.model_functions.user import (read_all_user,saveUser,saveOrUpdateUser,
 updateUser,deleteUser,readbyoperators)
 import logging
+from fastapi.staticfiles import StaticFiles
 
 router = APIRouter()
 
@@ -17,7 +18,9 @@ def uploadFile(file: UploadFile = File(...)):
         file_location = os.path.join(UPLOAD_DIRECTORY, file.filename)
         with open(file_location, "wb+") as file_object:
             file_object.write(file.file.read())
-        return {"info": f"file '{file.filename}' saved at '{file_location}'"}
+        file_url = f"http://localhost:8000/uploads/{file.filename}"
+
+        return {"info": f"file '{file.filename}' saved at '{file_location}' url '{file_url}'"}
     except Exception as e:
         print(f"Exception error {e}")
 

@@ -1151,7 +1151,7 @@ return jsondata
 - in read_all function you can see `isouter=True`
 ```
 # left join and full join reference: https://docs.sqlalchemy.org/en/20/tutorial/data_select.html
-stmt = select(State.id,State.statename,Country.countryname).join(Country, State.countries_id == Country.id, isouter=True) # join() used for inner join
+stmt = select(State.id,State.statename,Country.countryname).join(Country, State.countries_id == Country.id, isouter=True) # isouter=True used in join() for left join
 result = db.execute(stmt) 
 print(stmt.compile(engine))
 data = result.all() # It return tuple with values only
@@ -1444,6 +1444,47 @@ Successfully installed loguru-0.7.2
 1. install the python-multipart. Reference: https://fastapi.tiangolo.com/tutorial/request-files
 ```
 (env) atul@atul-Lenovo-G570:~/fastcrud$ pip3 install python-multipart
+```
+2. create the `router/api/file_route.py`
+```
+import os
+from fastapi import APIRouter,Depends,status, File, UploadFile
+from typing import Annotated
+from sqlalchemy.orm import Session
+from database.session import get_db
+from database.model_functions.user import (read_all_user,saveUser,saveOrUpdateUser,
+updateUser,deleteUser,readbyoperators)
+import logging
+from fastapi.staticfiles import StaticFiles
+
+router = APIRouter()
+
+@router.post("/upload-file",name="uploadfile")
+def uploadFile(file: UploadFile = File(...)):
+    try:
+        UPLOAD_DIRECTORY = "./uploads/" # Ensure the directory exists 
+        os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
+        file_location = os.path.join(UPLOAD_DIRECTORY, file.filename)
+        with open(file_location, "wb+") as file_object:
+            file_object.write(file.file.read())
+        file_url = f"http://localhost:8000/uploads/{file.filename}"
+
+        return {"info": f"file '{file.filename}' saved at '{file_location}' url '{file_url}'"}
+    except Exception as e:
+        print(f"Exception error {e}")
+
+
+@router.post("/upload-file-by-uploadfile",name="uploadfile")
+def uploadFile(file:UploadFile):
+    try:
+        UPLOAD_DIRECTORY = "./uploads/" # Ensure the directory exists 
+        os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
+        file_location = os.path.join(UPLOAD_DIRECTORY, file.filename)
+        with open(file_location, "wb+") as file_object:
+            file_object.write(file.file.read())
+        return {"info": f"file '{file.filename}' saved at '{file_location}'"}
+    except Exception as e:
+        print(f"Exception error {e}")
 ```
 
 ## how to generate url from uploaded file or images. It means how to mount static files?
